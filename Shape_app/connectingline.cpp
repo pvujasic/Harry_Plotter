@@ -1,6 +1,6 @@
 #include "connectingline.h"
 
-
+using namespace std;
 
 connectingLine::connectingLine(QGraphicsItem *parent) : QGraphicsLineItem(parent)
 {

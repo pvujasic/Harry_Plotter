@@ -24,10 +24,11 @@
 
 #include "coordinatesystem.h"
 #include "point.h"
-#include "connectingline.h"
 
 
-using namespace std;
+class connectingLine;
+
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -56,8 +57,8 @@ private slots:
 private:
     Ui::MainWindow *ui;
     QGraphicsScene* scene;
-    vector<QPointF> points;
-    tuple<double, double, double, double> system_Info;
+    std::vector<QPointF> points;
+    std::tuple<double, double, double, double> system_Info;
     int type;
     QList<connectingLine*> lines;
 

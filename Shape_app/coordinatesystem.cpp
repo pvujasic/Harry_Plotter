@@ -1,5 +1,7 @@
 #include "coordinatesystem.h"
 
+using namespace std;
+
 coordinateSystem::coordinateSystem(QGraphicsScene *scene, QGraphicsItem *parent) : QGraphicsItemGroup(parent)
 {
     QGraphicsRectItem* rectangle = new QGraphicsRectItem();

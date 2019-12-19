@@ -54,7 +54,11 @@ void MainWindow::on_selectFile_clicked()
     points.clear();
     lines.clear();
 
-    QFile file(QFileDialog::getOpenFileName(this, tr("Open File"), "", tr("Text Files (*.txt)"))); // "/home/paula/Diplomski"
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), "", tr("Text Files (*.txt)"));
+    if(fileName.isEmpty()){
+        return;
+    }
+    QFile file(fileName); // "/home/paula/Diplomski"
     file.open(QIODevice::ReadOnly | QIODevice::Text);   
 
     QTextStream in(&file);

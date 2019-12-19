@@ -48,10 +48,7 @@ public:
 
 private slots:
     void on_selectFile_clicked();
-
     void on_checkBox_stateChanged(int checked);
-
-
     void on_pushButton_clicked();
 
 private:

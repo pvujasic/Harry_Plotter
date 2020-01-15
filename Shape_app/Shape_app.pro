@@ -18,6 +18,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     connectingline.cpp \
     coordinatesystem.cpp \
+    fparser.cc \
+    fpoptimizer.cc \
     main.cpp \
     mainwindow.cpp \
     point.cpp
@@ -25,8 +27,13 @@ SOURCES += \
 HEADERS += \
     connectingline.h \
     coordinatesystem.h \
+    extrasrc/fpaux.hh \
+    extrasrc/fptypes.hh \
+    fparser.hh \
+    fpconfig.hh \
     mainwindow.h \
-    point.h
+    point.h \
+    spline.h
 
 FORMS += \
     mainwindow.ui
@@ -35,3 +42,10 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+DISTFILES += \
+    extrasrc/fp_identifier_parser.inc \
+    extrasrc/fp_opcode_add.inc
+
+RESOURCES += \
+    Images.qrc

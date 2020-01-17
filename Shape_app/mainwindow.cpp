@@ -21,7 +21,7 @@ MainWindow::MainWindow(QWidget *parent)
     int height =ui->graphicsView->height();
     scene->setSceneRect(0, 0, width, height);
     ui->graphicsView->setFixedSize(width+2*ui->graphicsView->frameWidth(), height+2*ui->graphicsView->frameWidth());
-    this->setFixedSize(QSize(1062, 610));
+    this->setFixedSize(QSize(1062, 800));
 
     QGraphicsTextItem* startText = new QGraphicsTextItem();
     startText->setPlainText("Get started!");
@@ -95,7 +95,7 @@ bool sameX(vector<QPointF> points) //vraca true ako vector sadrzi tocke s istom 
 void MainWindow::on_selectFile_clicked() //slot za Select file
 {
     ui->warningLabel->setText("");
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), "", tr("Text Files (*.txt)")); //"/home/paula/Diplomski"
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), "/home/paula/Diplomski", tr("Text Files (*.txt)")); //"/home/paula/Diplomski"
     if(fileName.isEmpty()){
         return;
     }
@@ -169,15 +169,16 @@ void MainWindow::on_selectFile_clicked() //slot za Select file
 
 vector<double> linspace(double start, double end, int num) //po uzoru na pythonovu fju linspace, vraca vector jednoliko rasporedenih brojeva u zadanom intervalu
 {
-  vector<double> linspaced;
-  double delta = (end - start)/(num - 1);
+    vector<double> linspaced(num);
+    double delta = (end - start)/(num - 1);
 
-  for(int i = 0; i < num-1; ++i)
-    {
-      linspaced.push_back(start + delta * i);
-    }
-  linspaced.push_back(end);
-  return linspaced;
+    for(int i = 0; i < num-1; ++i)
+      {
+        linspaced[i] = start + delta * i;
+      }
+
+    linspaced[num-1] = end;
+    return linspaced;
 }
 
 void MainWindow::on_drawButton_clicked() //slot za klik gumba Draw
@@ -248,7 +249,10 @@ void MainWindow::on_drawButton_clicked() //slot za klik gumba Draw
                     yEnd = f_x;
             }
             else
+            {
+                points[n].push_back(QPointF(numeric_limits<double>::epsilon(),numeric_limits<double>::epsilon()));
                 ui->warningLabel->setText("Function f(x) = " + (*i)->text() + " is not defined for the whole range.");
+            }
         }
     }
 
@@ -325,6 +329,13 @@ QString selectColor(int colorNumber)
         return QString("#69d1a7");
 }
 
+bool isUndefined(QPointF point)
+{
+    if(compareDoubles(point.x(), numeric_limits<double>::epsilon()) && compareDoubles(point.y(), numeric_limits<double>::epsilon()))
+        return true;
+    return false;
+}
+
 void MainWindow::createLines(std::vector<QPointF> points[5]) //iscrtavanje linija medu tockama
 {                                                            //fja prima argument points (unatoc varijabli clanici points) zbog slucaja iscrtavanja linija za kubicni spline
     QString color;
@@ -335,6 +346,8 @@ void MainWindow::createLines(std::vector<QPointF> points[5]) //iscrtavanje linij
             continue;
         for (auto i = points[n].begin(); i != (points[n].end() - 1); ++i)
         {
+            if(isUndefined(*i) || isUndefined(*(i+1)))
+                continue;
             connectingLine* line = new connectingLine(transformX(i->x()), transformY(i->y()), transformX((i+1)->x()), transformY((i+1)->y()), color);
             scene->addItem(line);        
             lines.push_back(line);
@@ -451,3 +464,20 @@ void MainWindow::on_doubleSpinBox_2_valueChanged(double d)
 {
     ui->resetButton->setEnabled(true);
 }
+
+//sad:
+    //na reset se sve obriše i ostane koordinatni sustav, sve vrati na default
+    //includeovi
+    //staviti da iscrtava sve osim krivo zadanih, možda povećati labelu za ispis greški
+    //poboljšati primjere za točke.. umaskirati za spline
+    //labela upozorenja
+    //funkcionalnosti..
+
+
+//za kasnije:
+    //template za create lines
+    //zacrvenjeno
+    //fokus
+    //brisanje fja i enable plot gumba
+    //vidjeti path za brisanje linija
+    //promjena imena

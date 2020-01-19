@@ -6,13 +6,11 @@
 class Point : public QGraphicsEllipseItem
 {
 public:
-    Point(double x, double y, double x_, double y_, QGraphicsScene* scene, QGraphicsItem* parent = nullptr);
+    Point(double x, double y, double x_, double y_, QString color, QGraphicsScene* scene, QGraphicsItem* parent = nullptr);
 
 private:
     const double radius = 10;
-    double x;
-    double y;
-    QGraphicsTextItem* coordinateText;
+    QGraphicsTextItem* coordinateText = new QGraphicsTextItem();
     QGraphicsScene* scene;
 
     void hoverEnterEvent(QGraphicsSceneHoverEvent*);

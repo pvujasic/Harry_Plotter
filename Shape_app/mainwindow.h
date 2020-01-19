@@ -61,26 +61,33 @@ private slots:
 
     void on_functionEdit1_textEdited();
 
-    void on_doubleSpinBox_valueChanged(double d);
+    void on_x_from_valueChanged(double d);
 
-    void on_doubleSpinBox_2_valueChanged(double d);
+    void on_x_to_valueChanged(double d);
 
 private:
     Ui::MainWindow *ui;
     QGraphicsScene* scene;
 
-    std::vector<QPointF> points[5]; //niz od 5 vectora (jer je moguce iscrtati max. 5 fja - u slucaju iscrtavanja iz datoteke samo prvi vector sadrzi tocke)
+    std::vector<QPointF> filePoints[5]; //niz od 5 vectora (jer je moguce iscrtati max. 5 fja - u slucaju iscrtavanja iz datoteke samo prvi vector sadrzi tocke)
+    std::vector<QPointF> splinePoints[5];
+    std::vector<QPointF> functionPoints[5];
     std::tuple<double, double, double, double> system_Info; //informacije o koordinatnom sustavu koje sluze za iscrtavanje linija i tocaka
-    int type; //type - na pocetku je 0, za iscrtavanje iz datoteke iznosi 1, a kod crtanja funkcija iznosi 2
-    QList<connectingLine*> lines;
     QGraphicsItemGroup* grid;
     std::vector<QLineEdit*> functionEdits;
+    std::vector<QLabel*> fileLabels;
+    std::vector<QCheckBox*> fileBoxes;
 
     double transformX(double x);
     double transformY(double y);
-    void createLines(std::vector<QPointF> points[5]);
-    void deleteLines();
-    void cubicSpline(std::vector<QPointF> splinePoints[5]);
+    void createLines();
+    void createPoints();
     void disableButtons();
+    int firstEmpty(bool type);
+    int numberElements(bool type);
+    void clearPoints();
+    void yBoundaries(double* yStart, double* yEnd, double xStart, double xEnd);
+
+    void plot(QPointF xRange, QPointF yRange);
 };
 #endif // MAINWINDOW_H

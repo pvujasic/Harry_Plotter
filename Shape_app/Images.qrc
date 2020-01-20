@@ -4,5 +4,8 @@
         <file>arrow.png</file>
         <file>white_arrow.png</file>
         <file>white_arrow2.png</file>
+        <file>Logo.svg</file>
+        <file>Logo.png</file>
+        <file>Magic plotter logo.svg</file>
     </qresource>
 </RCC>

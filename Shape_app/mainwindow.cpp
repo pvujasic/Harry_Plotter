@@ -30,8 +30,8 @@ MainWindow::MainWindow(QWidget *parent)
     scene->addItem(startText);
 
     functionEdits.push_back(ui->functionEdit1);
-    disableButtons();
     grid = new QGraphicsItemGroup();
+    changedProgramatically = false;
 }
 
 MainWindow::~MainWindow()
@@ -39,18 +39,10 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-double MainWindow::transformX(double x) //transformira x vrijednost u onu koja ce se iscrtati na ekranu (u ovisnosti o koordinatnom sustavu)
+QPointF MainWindow::transform(QPointF point) //transformira tocku u onu koja ce se iscrtati na ekranu (u ovisnosti o koordinatnom sustavu)
 {
-    double xStart = get<0>(system_Info);
-    double xStep = get<2>(system_Info);
-    return x1 + (x-xStart)*xStep;
-}
-
-double MainWindow::transformY(double y) //transformira y vrijednost u onu koja ce se iscrtati na ekranu (u ovisnosti o koordinatnom sustavu)
-{
-    double yStart = get<1>(system_Info);
-    double yStep = get<3>(system_Info);
-    return scene->height()-y2 - (y-yStart)*yStep;
+    auto[xStart, yStart, xStep, yStep] = system_Info;
+    return QPointF(x1 + (point.x()-xStart)*xStep, scene->height()-y2 - (point.y()-yStart)*yStep);
 }
 
 bool compareDoubles(double a, double b) //provjera jednakosti dva double broja
@@ -62,11 +54,12 @@ bool compareDoubles(double a, double b) //provjera jednakosti dva double broja
 bool sameX(vector<QPointF> points) //vraca true ako vector sadrzi tocke s istom x vrijednosti
 {
     sort(points.begin(), points.end());
-    for(auto i = points.begin(); i != points.end() - 1; ++i)
-    {
-        if(compareDoubles(i->x(), (i+1)->x()))
-            return true;
-    }
+    if(!points.empty())
+        for(auto i = points.begin(); i != points.end() - 1; ++i)
+        {
+            if(compareDoubles(i->x(), (i+1)->x()))
+                return true;
+        }
     return false;
 }
 
@@ -97,54 +90,29 @@ QString selectColor(int colorNumber)
     }
 }
 
-int MainWindow::firstEmpty(bool type)   //vraca int slobodnog mjesta za function edit/file label
-                                        //type - 0 za file, 1 za funkcije
+int firstEmpty(vector<QLabel*> fileLabels)   //vraca int slobodnog mjesta za function edit
 {
-    if(type)
+    if(fileLabels.empty())
+        return 0;
+    int n = 0;
+    for(auto i = fileLabels.begin(); i != fileLabels.end(); ++i)
     {
-        if(functionEdits.size() < 5)
-            return int(functionEdits.size());
-        int n = 0;
-        for(auto i = functionEdits.begin(); i != functionEdits.end(); ++i)
-        {
-            if(!(*i))
-                return n;
-            ++n;
-        }
-        return -1;
+        if(!(*i))
+            return n;
+        ++n;
     }
-    else
-    {
-        if(fileLabels.size() < 5)
-            return int(fileLabels.size());
-        int n = 0;
-        for(auto i = fileLabels.begin(); i != fileLabels.end(); ++i)
-        {
-            if(!(*i))
-                return n;
-            ++n;
-        }
-        return -1;
-    }
+    return n;
 }
 
-int MainWindow::numberElements(bool type)
+int numberElements(vector<QLabel*> fileLabels)
 {
     int n = 0;
-    if(type)
-    {
-        for(auto i = functionEdits.begin(); i != functionEdits.end(); ++i)
-            if(*i)
-                ++n;
-        return n;
-    }
-    else
-    {
-        for(auto i = fileLabels.begin(); i != fileLabels.end(); ++i)
-            if(*i)
-                ++n;
-        return n;
-    }
+    if(fileLabels.empty())
+        return 0;
+    for(auto i = fileLabels.begin(); i != fileLabels.end(); ++i)
+        if(*i)
+            ++n;
+    return n;
 }
 
 vector<double> linspace(double start, double end, int num) //po uzoru na pythonovu fju linspace, vraca vector jednoliko rasporedenih brojeva u zadanom intervalu
@@ -161,31 +129,39 @@ vector<double> linspace(double start, double end, int num) //po uzoru na pythono
     return linspaced;
 }
 
-vector<QPointF> cubicSpline(vector<QPointF> points) //vector tocaka za iscrtavanje kubicnog spline-a
+void MainWindow::cubicSpline(double xStart, double xEnd) //za iscrtavanje kubicnog spline-a
 
 {
-    vector<QPointF> splinePoints(1000);
     vector<double> X, Y;
-    for(auto i = points.begin(); i != points.end(); ++i)
-    {
-        X.push_back(i->x());
-        Y.push_back(i->y());
-    }
     tk::spline s;
-    s.set_points(X,Y);
-    vector<double> x = linspace(*X.begin(), *(X.end()-1), 1000);
-    int n = 0;
-    for(auto i = x.begin(); i != x.end(); ++i)
+
+
+    for(int n = 0; n < 5; ++n)
     {
-        splinePoints[n] = QPointF(*i,s(*i));
-        ++n;
+        splinePoints[n].clear();
+        if(filePoints[n].empty())
+            continue;
+        for(auto i = filePoints[n].begin(); i != filePoints[n].end(); ++i)
+        {
+            X.push_back(i->x());
+            Y.push_back(i->y());
+        }
+
+        s.set_points(X,Y);
+        vector<double> x = linspace(xStart, xEnd, 1000);
+
+        for(auto i = x.begin(); i != x.end(); ++i)
+            splinePoints[n].push_back(QPointF(*i,s(*i)));
+
+        X.clear();
+        Y.clear();
     }
-    return splinePoints;
 }
 
 void MainWindow::on_selectFile_clicked() //slot za Select file
 {
     ui->warningLabel->setText("");
+
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), "/home/paula/Diplomski", tr("Text Files (*.txt)")); //"/home/paula/Diplomski"
     if(fileName.isEmpty()){
         return;
@@ -194,8 +170,8 @@ void MainWindow::on_selectFile_clicked() //slot za Select file
     QFile file(fileName);
     file.open(QIODevice::ReadOnly | QIODevice::Text);
 
-    int position = firstEmpty(0);
-    int fileNumber = numberElements(0);
+    int position = firstEmpty(fileLabels);
+    int fileNumber = numberElements(fileLabels);
 
     vector<QPointF> points;
     QTextStream in(&file);
@@ -226,7 +202,7 @@ void MainWindow::on_selectFile_clicked() //slot za Select file
 
     ui->formLayout_2->insertRow(fileNumber,fileLabel,fileBox);
 
-    if(fileNumber == 5)
+    if(fileNumber != int(fileLabels.size()))
     {
     fileLabels[position] = fileLabel;
     fileBoxes[position] = fileBox;
@@ -240,50 +216,25 @@ void MainWindow::on_selectFile_clicked() //slot za Select file
     if(int(fileNumber == 5))
         ui->selectFile->setEnabled(false);
 
-    //ui->delete_function->setEnabled(true);
-    ui->resetButton->setEnabled(true);
-
     if(points.size() < 3)
     {
-        ui->warningLabel->setText("File does not contain at least three correctly specified points.");
+        ui->warningLabel->setText("File does not contain at least three correctly specified points.\nPoints from this file won't be plotted.");
+        fileLabels[position]->setStyleSheet("border: 1px solid #850000;\ncolor: "+ color);
         return;
     }
 
     if(sameX(points)) //provjera sadrzi li file tocke s istom x vrijednosti
     {
-        ui->warningLabel->setText("File contains points with same x value.");
+        ui->warningLabel->setText("File contains points with same x value.\nPoints from this file won't be plotted.");
+        fileLabels[position]->setStyleSheet("border: 1px solid #850000;\ncolor: "+ color);
         return;
     }
 
     sort(points.begin(), points.end());
     filePoints[position] = points;
-    splinePoints[position] = cubicSpline(points);
 
-   /* coordinateSystem* system = new coordinateSystem(scene);
-    tuple<double, double, double, double> boundaries = findBoundaries(points[0]);
-    auto[system_Info_, grid_] =  system->init(scene, get<0>(boundaries), get<1>(boundaries), get<2>(boundaries), get<3>(boundaries)); //elegantniji nacin?
-    system_Info = system_Info_;
-    grid = grid_;
-
-    for (auto i = points[0].begin(); i != points[0].end(); ++i)
-    {
-        Point* point = new Point(i->x(), i->y(), transformX(i->x()), transformY(i->y()), "white", scene);
-        scene->addItem(point);
-    }
-
-    sort(points[0].begin(), points[0].end());
-
-    if(ui->style_comboBox->currentIndex() == 1)
-       createLines(points);
-    else if(ui->style_comboBox->currentIndex() == 2)
-    {
-        vector<QPointF> splinePoints[5];
-        cubicSpline(splinePoints);
-        createLines(splinePoints);
-    }
-
-    if(!ui->gridBox->isChecked())
-       grid->hide();*/
+    if(numberElements(fileLabels) == 5)
+        ui->selectFile->setEnabled(false);
 }
 
 bool isUndefined(QPointF point)
@@ -331,11 +282,9 @@ void MainWindow::yBoundaries(double* yStart, double* yEnd, double xStart, double
         *yStart -= 3;
         *yEnd += 3;
     }
-    for(int i = 0; i < Y.size(); ++i)
-        qDebug() << Y[i];
 }
 
-void MainWindow::plot(QPointF xRange, QPointF yRange)
+void MainWindow::plot(bool automatic)
 {
     ui->warningLabel->setText("");
     double xStart, xEnd, yStart, yEnd;
@@ -343,11 +292,25 @@ void MainWindow::plot(QPointF xRange, QPointF yRange)
     xStart = double(ui->x_from->value());
     xEnd = double(ui->x_to->value());
 
-    if(xRange.isNull())
+    if(automatic)
     {
-        //naci max od tocaka filePoints
-        //ako veci staviti ga
+        double min = xStart, max = xEnd;
+        for(int i = 0; i < 5; ++i)
+        {
+            if(!filePoints[i].empty())
+            {
+                if(filePoints[i].front().x() < min) //filePoints su uvijek sortirane
+                    min = filePoints[i].front().x();
+                if(filePoints[i].back().x() > max)
+                    max = filePoints[i].back().x();
+            }
+        }
+        xStart = min;
+        xEnd = max;
     }
+
+    if(ui->style_comboBox->currentIndex() == 2)
+        cubicSpline(xStart, xEnd);
 
     FunctionParser fparser;
     fparser.AddConstant("pi", 3.14159265358979323846);
@@ -389,21 +352,25 @@ void MainWindow::plot(QPointF xRange, QPointF yRange)
         }
     }
 
-    if(yRange.isNull())
+    if(automatic)
     {
         yBoundaries(&yStart, &yEnd, xStart, xEnd);
 
+        changedProgramatically = true;
         ui->y_from->setValue(yStart);
+        changedProgramatically = true;
         ui->y_to->setValue(yEnd);
+
+        changedProgramatically = true;
+        ui->x_from->setValue(xStart);
+        changedProgramatically = true;
+        ui->x_to->setValue(xEnd);
     }
     else
     {
         yStart = ui->y_from->value();
         yEnd = ui->y_to->value();
     }
-
-    ui->x_from->setValue(xStart);
-    ui->x_to->setValue(xEnd);
 
     yEnd += 0.02*(yEnd-yStart); //kod postavljanja koordinatnog sustava saljemo malo manje/vece vrijednosti kako bi se izbjeglo iscrtavanje uz sam rub sustava
     yStart -= 0.02*(yEnd-yStart);
@@ -417,36 +384,41 @@ void MainWindow::plot(QPointF xRange, QPointF yRange)
 
 
     createPoints();
-    createLines();
+    createLines(functionPoints, 1);
+    if(ui->style_comboBox->currentIndex() == 1)
+        createLines(filePoints, 0);
+    if(ui->style_comboBox->currentIndex() == 2)
+        createLines(splinePoints, 0);
+
     if(!ui->gridBox->isChecked())
        grid->hide();
+
+    ui->x_from->setEnabled(true);
+    ui->x_to->setEnabled(true);
+    ui->y_from->setEnabled(true);
+    ui->y_to->setEnabled(true);
 }
 
 
 void MainWindow::on_drawButton_clicked()
 {
-    plot(QPointF(), QPointF());
+    plot(true);
 }
 
+bool pointsEmpty(vector<QPointF> points[5])
+{
+    for(int i = 0; i < 5; ++i)
+    {
+        if(!points[i].empty())
+            return false;
+    }
+    return true;
+}
 
 void MainWindow::on_style_comboBox_currentIndexChanged(int index) //slot za promjenu stila kod iscrtavanja iz datoteke
 {
-        /*
-        if(index == 0)
-           deleteLines();
-        else if(index == 1)
-        {
-            deleteLines();
-            createLines(points);
-        }
-        else
-        {
-            deleteLines();
-            vector<QPointF> splinePoints[5];
-            cubicSpline(splinePoints);
-            createLines(splinePoints);
-        }
-    }*/
+    if(!pointsEmpty(filePoints))
+        plot(false);
 }
 
 
@@ -465,6 +437,14 @@ bool operator < (QPointF a, QPointF b) //kako bismo mogli sortirati vector tocak
     }
 }
 
+bool MainWindow::pointInSystem(QPointF point) 
+{
+    double multiplier = (ui->y_from->value() > 0)? 0.9:1.1;
+    if(point.x() >= ui->x_from->value() && point.x() <= ui->x_to->value() && point.y() >= ui->y_from->value()*multiplier && point.y() <= ui->y_to->value()*1.1) //(point.x() >= x1 && point.x() <= scene->width()-x2 && point.y() >= y1 && point.y() <= scene->height()-y2)
+        return true;
+    return false;
+}
+
 void MainWindow::createPoints()
 {
     for(int n = 0; n < 5; ++n)
@@ -474,54 +454,43 @@ void MainWindow::createPoints()
 
         for (auto i = filePoints[n].begin(); i != filePoints[n].end(); ++i)
         {
-            Point* point = new Point(i->x(), i->y(), transformX(i->x()), transformY(i->y()), selectColor(n+5), scene);
-            scene->addItem(point);
+            if(pointInSystem(*i))
+            {
+                Point* point = new Point(*i, transform(*i), selectColor(n+5), scene);
+                scene->addItem(point);
+            }
         }
     }
 }
 
-void MainWindow::createLines() //iscrtavanje linija medu tockama
+
+void MainWindow::createLines(vector<QPointF> points[5], bool type) //iscrtavanje linija medu tockama //type - 0 za file, 1 za funkcije
 {
     QString color;
+    QString text;
     for (int n = 0; n < 5; ++n)
     {
-        color = selectColor(n);
-        if(functionPoints[n].empty())
+        if(points[n].empty())
             continue;
-        for (auto i = functionPoints[n].begin(); i != (functionPoints[n].end() - 1); ++i)
+
+        if(type)
+        {
+            color = selectColor(n);
+            text = "f(x) = " + functionEdits[unsigned(n)]->text();
+        }
+        else
+        {
+            color = selectColor(n+5);
+            text = fileLabels[unsigned(n)]->text();
+        }
+
+        for (auto i = points[n].begin(); i != (points[n].end() - 1); ++i)
         {
             if(isUndefined(*i) || isUndefined(*(i+1)))
                 continue;
-            connectingLine* line = new connectingLine(transformX(i->x()), transformY(i->y()), transformX((i+1)->x()), transformY((i+1)->y()), color, functionEdits[unsigned(n)]->text(), scene);
-            scene->addItem(line);        
-        }
-    }
-
-    if(ui->style_comboBox->currentIndex() == 1)
-    {
-        for (int n = 0; n < 5; ++n)
-        {
-            color = selectColor(n+5);
-            if(filePoints[n].empty())
-                continue;
-            for (auto i = filePoints[n].begin(); i != (filePoints[n].end() - 1); ++i)
+            if(pointInSystem(*i) && pointInSystem(*(i+1)))
             {
-                connectingLine* line = new connectingLine(transformX(i->x()), transformY(i->y()), transformX((i+1)->x()), transformY((i+1)->y()), color, "", scene);
-                scene->addItem(line);
-            }
-        }
-    }
-
-    else if(ui->style_comboBox->currentIndex() == 2)
-    {
-        for (int n = 0; n < 5; ++n)
-        {
-            color = selectColor(n+5);
-            if(splinePoints[n].empty())
-                continue;
-            for (auto i = splinePoints[n].begin(); i != (splinePoints[n].end() - 1); ++i)
-            {
-                connectingLine* line = new connectingLine(transformX(i->x()), transformY(i->y()), transformX((i+1)->x()), transformY((i+1)->y()), color, "", scene);
+                connectingLine* line = new connectingLine(transform(*i), transform(*(i+1)), color, text, scene);
                 scene->addItem(line);
             }
         }
@@ -564,14 +533,8 @@ void MainWindow::on_add_function_clicked()
         ui->add_function->setEnabled(false);
 
     ui->delete_function->setEnabled(true);
-    ui->resetButton->setEnabled(true);
 }
 
-void MainWindow::disableButtons() //onemogucuje gumbe za crtanje i reset
-{
-    ui->drawButton->setEnabled(false);
-    ui->resetButton->setEnabled(false);
-}
 
 void MainWindow::on_delete_function_clicked()
 {
@@ -581,82 +544,149 @@ void MainWindow::on_delete_function_clicked()
     if(int(functionEdits.size()) == 1)
         ui->delete_function->setEnabled(false);
 
-    ui->add_function->setEnabled(true);    
+    ui->add_function->setEnabled(true);
+}
+
+
+void MainWindow::on_deleteFiles_clicked()
+{
+    int n = 0;
+    QLabel* label;
+    if(!fileBoxes.empty())
+    {
+        for(auto i = fileBoxes.begin(); i != fileBoxes.end(); ++i)
+        {
+            if(*i)
+                if(fileBoxes[n]->isChecked())
+                {
+                    filePoints[n].clear();
+                    splinePoints[n].clear();
+                    label = fileLabels[n];
+                    fileLabels[n] = nullptr;
+                    fileBoxes[n] = nullptr;
+                    ui->formLayout_2->removeRow(ui->formLayout_2->indexOf(label)/2);
+                }
+            ++n;
+        }
+    }
+    if(numberElements(fileLabels) < 5)
+        ui->selectFile->setEnabled(true);
 }
 
 void MainWindow::on_resetButton_clicked() //defaultne postavke i onemogucavanje odgovarajucih gumba
 {
-    for(int i = numberElements(1)-1; i > 0; --i)
+    for(int i = int(functionEdits.size())-1; i > 0; --i)
         ui->formLayout->removeRow(i);
 
-    for(int i = numberElements(0)-1; i >= 0; --i)
+    for(int i = numberElements(fileLabels)-1; i >= 0; --i)
         ui->formLayout_2->removeRow(i);
 
     functionEdits.clear();
     functionEdits.push_back(ui->functionEdit1);
     fileLabels.clear();
     fileBoxes.clear();
+    clearPoints();
 
     ui->functionEdit1->setText("");
     ui->warningLabel->setText("");
+    changedProgramatically = true;
     ui->x_from->setValue(-3);
+    changedProgramatically = true;
     ui->x_to->setValue(3);
+    changedProgramatically = true;
     ui->y_from->setValue(-3);
+    changedProgramatically = true;
     ui->y_to->setValue(3);
     ui->pointsNumber->setValue(101);
     ui->style_comboBox->setCurrentIndex(0);
     ui->gridBox->setCheckState(Qt::CheckState(false));
-
-    clearPoints();
-
-    ui->add_function->setEnabled(true);
     ui->delete_function->setEnabled(false);
-    disableButtons();
+    ui->add_function->setEnabled(true);
 
-    plot(QPointF(), QPointF()); //provjeriti za eneablanje gumbi, za checkboxove kod fileova
-}
-
-void MainWindow::on_functionEdit1_textEdited()
-{
-    ui->drawButton->setEnabled(true);
-    ui->resetButton->setEnabled(true);
+    plot(true); //moze i false
 }
 
 void MainWindow::on_x_from_valueChanged(double d)
 {
-    ui->resetButton->setEnabled(true);
-
-   /* if(xEnd - xStart <= 0)
+    if(changedProgramatically)
     {
-        ui->warningLabel->setText("Incorrect range!");
+        changedProgramatically = false;
         return;
-    }*/
+    }
+    if(ui->x_to->value() - ui->x_from->value() <= 0)
+    {
+        ui->warningLabel->setText("Incorrect x range!");
+        return;
+    }
+
+    plot(false);
 }
 
 void MainWindow::on_x_to_valueChanged(double d)
 {
-    ui->resetButton->setEnabled(true);
+    if(changedProgramatically)
+    {
+        changedProgramatically = false;
+        return;
+    }
+    if(ui->x_to->value() - ui->x_from->value() <= 0)
+    {
+        ui->warningLabel->setText("Incorrect x range!");
+        return;
+    }
+
+    plot(false);
+}
+
+void MainWindow::on_y_from_valueChanged(double arg1)
+{
+    if(changedProgramatically)
+    {
+        changedProgramatically = false;
+        return;
+    }
+    if(ui->y_to->value() - ui->y_from->value() <= 0)
+    {
+        ui->warningLabel->setText("Incorrect y range!");
+        return;
+    }
+
+    plot(false);
+}
+
+void MainWindow::on_y_to_valueChanged(double arg1)
+{
+    if(changedProgramatically)
+    {
+        changedProgramatically = false;
+        return;
+    }
+    if(ui->y_to->value() - ui->y_from->value() <= 0)
+    {
+        ui->warningLabel->setText("Incorrect y range!");
+        return;
+    }
+
+    plot(false);
+}
+
+void MainWindow::on_pointsNumber_valueChanged(int arg1)
+{
+    if(!pointsEmpty(functionPoints))
+        plot(true);
 }
 
 //sad:
-    //crte ne bjeze iz sustava
-    //splajn racuna za cijeli range
-    //min max xRange
-
-    //includeovi
     //labela za greske
-    //urediti ponavljanja koda..
     //poboljšati primjere za točke.. umaskirati za spline
-    //funkcionalnosti.. //if startText-->text == "get started" nista else plot()
-    //zacrvenjeno
+    //includeovi
     //promijeniti komentare
-    //srediti reset, srediti na što se sve eneabla
     //promijeniti boje funkcija i velicine tocki
 
-//kasnije:
-    //template za create lines
-    //fokus
-    //vidjeti path za brisanje linija
+//ime, gitignore, parser
 
 
-// ime, gitignore, parser, dinamicki slotovi - brisanje fja i enable plot gumba
+
+
+
+

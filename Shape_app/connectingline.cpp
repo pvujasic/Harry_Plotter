@@ -1,24 +1,20 @@
 #include "connectingline.h"
 
-connectingLine::connectingLine(double x1, double y1, double x2, double y2, QString color, QString function, QGraphicsScene* scene, QGraphicsItem *parent) : QGraphicsLineItem(parent)
+connectingLine::connectingLine(QPointF point1, QPointF point2, QString color, QString function, QGraphicsScene* scene, QGraphicsItem *parent) : QGraphicsLineItem(parent)
 {
     QColor penColor(color);
     QPen pen(penColor);
     this->setPen(pen);
 
-    this->setPos(x1 + (x2 - x1)/2, y1 + (y2 - y1)/2);
-    this->setLine(-(x2 - x1)/2, -(y2 - y1)/2, (x2 - x1)/2, (y2 - y1)/2);
+    this->setLine(point1.x(), point1.y(), point2.x(), point2.y());
     setAcceptHoverEvents(true);
 
-    if(function != "")
-    {
     functionText->setDefaultTextColor(color);
     functionText->setPlainText(function);
-    functionText->setX(this->scenePos().x()+20);
-    functionText->setY(this->scenePos().y()-20);
+    functionText->setX(70);
+    functionText->setY(20);
     scene->addItem(functionText);
     functionText->setVisible(false);
-    }
 }
 
 void connectingLine::hoverEnterEvent(QGraphicsSceneHoverEvent*)

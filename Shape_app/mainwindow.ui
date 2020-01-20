@@ -453,7 +453,7 @@
    </palette>
   </property>
   <property name="windowTitle">
-   <string>Magic Plotter</string>
+   <string>Harry Plotter</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QGraphicsView" name="graphicsView">
@@ -501,7 +501,7 @@ border-radius: 12px;</string>
      </font>
     </property>
     <property name="text">
-     <string>Magic Plotter</string>
+     <string>Harry Plotter</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
@@ -855,10 +855,13 @@ background-color: #1C1C1C;
      <string/>
     </property>
     <widget class="QDoubleSpinBox" name="x_from">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>70</y>
+       <y>110</y>
        <width>71</width>
        <height>26</height>
       </rect>
@@ -873,27 +876,11 @@ background-color: #1C1C1C;
       <double>-3.000000000000000</double>
      </property>
     </widget>
-    <widget class="QPushButton" name="drawButton">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>150</y>
-       <width>121</width>
-       <height>25</height>
-      </rect>
-     </property>
-     <property name="styleSheet">
-      <string notr="true"/>
-     </property>
-     <property name="text">
-      <string>Do the magic</string>
-     </property>
-    </widget>
     <widget class="QWidget" name="verticalLayoutWidget_3">
      <property name="geometry">
       <rect>
        <x>90</x>
-       <y>100</y>
+       <y>140</y>
        <width>55</width>
        <height>31</height>
       </rect>
@@ -930,44 +917,9 @@ background-color: #1C1C1C;
       </item>
      </layout>
     </widget>
-    <widget class="QPushButton" name="resetButton">
-     <property name="geometry">
-      <rect>
-       <x>150</x>
-       <y>150</y>
-       <width>71</width>
-       <height>25</height>
-      </rect>
-     </property>
-     <property name="styleSheet">
-      <string notr="true"/>
-     </property>
-     <property name="text">
-      <string>Reset</string>
-     </property>
-    </widget>
     <widget class="QDoubleSpinBox" name="x_to">
-     <property name="geometry">
-      <rect>
-       <x>150</x>
-       <y>70</y>
-       <width>71</width>
-       <height>26</height>
-      </rect>
-     </property>
-     <property name="minimum">
-      <double>-99999.990000000005239</double>
-     </property>
-     <property name="maximum">
-      <double>99999.990000000005239</double>
-     </property>
-     <property name="value">
-      <double>3.000000000000000</double>
-     </property>
-    </widget>
-    <widget class="QDoubleSpinBox" name="y_to">
      <property name="enabled">
-      <bool>true</bool>
+      <bool>false</bool>
      </property>
      <property name="geometry">
       <rect>
@@ -987,11 +939,112 @@ background-color: #1C1C1C;
       <double>3.000000000000000</double>
      </property>
     </widget>
+    <widget class="QDoubleSpinBox" name="y_to">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>150</x>
+       <y>150</y>
+       <width>71</width>
+       <height>26</height>
+      </rect>
+     </property>
+     <property name="minimum">
+      <double>-99999.990000000005239</double>
+     </property>
+     <property name="maximum">
+      <double>99999.990000000005239</double>
+     </property>
+     <property name="value">
+      <double>3.000000000000000</double>
+     </property>
+    </widget>
+    <widget class="QWidget" name="verticalLayoutWidget_2">
+     <property name="geometry">
+      <rect>
+       <x>90</x>
+       <y>100</y>
+       <width>55</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="QLabel" name="label_10">
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+        <property name="text">
+         <string>x range</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_11">
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="pixmap">
+         <pixmap resource="Images.qrc">:/Files/download-divider-line-png-doub.png</pixmap>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+    <widget class="QDoubleSpinBox" name="y_from">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>150</y>
+       <width>71</width>
+       <height>26</height>
+      </rect>
+     </property>
+     <property name="minimum">
+      <double>-99999.990000000005239</double>
+     </property>
+     <property name="maximum">
+      <double>99999.990000000005239</double>
+     </property>
+     <property name="value">
+      <double>-3.000000000000000</double>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="drawButton">
+     <property name="geometry">
+      <rect>
+       <x>110</x>
+       <y>30</y>
+       <width>111</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
+     <property name="text">
+      <string>Do the magic</string>
+     </property>
+    </widget>
     <widget class="QCheckBox" name="gridBox">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>30</y>
+       <y>70</y>
        <width>92</width>
        <height>23</height>
       </rect>
@@ -1067,67 +1120,20 @@ background-color: #1C1C1C;
       <bool>false</bool>
      </property>
     </widget>
-    <widget class="QWidget" name="verticalLayoutWidget_2">
-     <property name="geometry">
-      <rect>
-       <x>90</x>
-       <y>60</y>
-       <width>55</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout_2">
-      <item>
-       <widget class="QLabel" name="label_10">
-        <property name="layoutDirection">
-         <enum>Qt::LeftToRight</enum>
-        </property>
-        <property name="styleSheet">
-         <string notr="true"/>
-        </property>
-        <property name="text">
-         <string>x range</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="label_11">
-        <property name="styleSheet">
-         <string notr="true"/>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="pixmap">
-         <pixmap resource="Images.qrc">:/Files/download-divider-line-png-doub.png</pixmap>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-    <widget class="QDoubleSpinBox" name="y_from">
-     <property name="enabled">
-      <bool>true</bool>
-     </property>
+    <widget class="QPushButton" name="resetButton">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>110</y>
-       <width>71</width>
-       <height>26</height>
+       <y>30</y>
+       <width>81</width>
+       <height>25</height>
       </rect>
      </property>
-     <property name="minimum">
-      <double>-99999.990000000005239</double>
+     <property name="styleSheet">
+      <string notr="true"/>
      </property>
-     <property name="maximum">
-      <double>99999.990000000005239</double>
-     </property>
-     <property name="value">
-      <double>-3.000000000000000</double>
+     <property name="text">
+      <string>Reset</string>
      </property>
     </widget>
    </widget>
@@ -1195,7 +1201,7 @@ background-color: #1C1C1C;
       <rect>
        <x>10</x>
        <y>40</y>
-       <width>91</width>
+       <width>81</width>
        <height>25</height>
       </rect>
      </property>
@@ -1209,9 +1215,9 @@ background-color: #1C1C1C;
     <widget class="QPushButton" name="deleteFiles">
      <property name="geometry">
       <rect>
-       <x>130</x>
+       <x>110</x>
        <y>40</y>
-       <width>91</width>
+       <width>111</width>
        <height>25</height>
       </rect>
      </property>
@@ -1219,7 +1225,7 @@ background-color: #1C1C1C;
       <string notr="true"/>
      </property>
      <property name="text">
-      <string>Delete files</string>
+      <string>Delete checked</string>
      </property>
     </widget>
     <widget class="QWidget" name="formLayoutWidget_3">
@@ -1250,6 +1256,22 @@ background-color: #1C1C1C;
       </item>
      </layout>
     </widget>
+   </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>200</x>
+      <y>20</y>
+      <width>121</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="pixmap">
+     <pixmap resource="Images.qrc">:/Files/Magic plotter logo.svg</pixmap>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">

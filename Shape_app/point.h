@@ -6,7 +6,7 @@
 class Point : public QGraphicsEllipseItem
 {
 public:
-    Point(double x, double y, double x_, double y_, QString color, QGraphicsScene* scene, QGraphicsItem* parent = nullptr);
+    Point(QPointF representedPoint, QPointF systemPoint, QString color, QGraphicsScene* scene, QGraphicsItem* parent = nullptr);
 
 private:
     const double radius = 10;

@@ -59,11 +59,17 @@ private slots:
 
     void on_style_comboBox_currentIndexChanged(int index);
 
-    void on_functionEdit1_textEdited();
-
     void on_x_from_valueChanged(double d);
 
     void on_x_to_valueChanged(double d);
+
+    void on_y_from_valueChanged(double arg1);
+
+    void on_y_to_valueChanged(double arg1);
+
+    void on_pointsNumber_valueChanged(int arg1);
+
+    void on_deleteFiles_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -77,17 +83,16 @@ private:
     std::vector<QLineEdit*> functionEdits;
     std::vector<QLabel*> fileLabels;
     std::vector<QCheckBox*> fileBoxes;
+    bool changedProgramatically; //da znamo je li range promijenjen u programu, u tom slucaju se ne zove funkcija plot
 
-    double transformX(double x);
-    double transformY(double y);
-    void createLines();
+    QPointF transform(QPointF point);
+    void createLines(std::vector<QPointF> points[5], bool type);
     void createPoints();
-    void disableButtons();
-    int firstEmpty(bool type);
-    int numberElements(bool type);
     void clearPoints();
     void yBoundaries(double* yStart, double* yEnd, double xStart, double xEnd);
+    bool pointInSystem(QPointF point);
+    void cubicSpline(double xStart, double xEnd);
 
-    void plot(QPointF xRange, QPointF yRange);
+    void plot(bool automatic);
 };
 #endif // MAINWINDOW_H

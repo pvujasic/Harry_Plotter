@@ -9,6 +9,7 @@
 #include <QFileDialog>
 #include <QFile>
 #include <QTextStream>
+#include <QDebug>
 
 using namespace std;
 
@@ -166,7 +167,7 @@ void MainWindow::on_selectFile_clicked() //pritiskom gumba Select file u filePoi
 {
     ui->warningLabel->setText("");
 
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), "/home/paula/Diplomski", tr("Text Files (*.txt)")); //"/home/paula/Diplomski"
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), "", tr("Text Files (*.txt)")); //"/home/paula/shape-app"
     if(fileName.isEmpty()){
         return;
     }
@@ -229,7 +230,7 @@ void MainWindow::on_selectFile_clicked() //pritiskom gumba Select file u filePoi
 
     if(sameX(points)) //provjera sadrzi li file tocke s istom x vrijednosti
     {
-        ui->warningLabel->setText("File contains points with same x value.\nPoints from this file won't be plotted.");
+        ui->warningLabel->setText("File contains points with same x value.\n\nPoints from this file won't be plotted.");
         fileLabels[position]->setStyleSheet("border: 1px solid #850000;\ncolor: "+ color);
         return;
     }
@@ -420,6 +421,10 @@ void MainWindow::plot(bool automatic) //najvaznija funkcija, poziva se svaki put
 void MainWindow::on_drawButton_clicked()
 {
     plot(true); //automatski se racuna range
+
+    //for(auto i = functionPoints[0].begin(); i != functionPoints[0].end(); ++i) //kreiranje datoteka
+        //qDebug() << QString::number(i->x()) + ", " + QString::number(i->y());
+    //qDebug() << "------------------";
 }
 
 bool pointsEmpty(vector<QPointF> points[5]) //provjera je li svaki od 5 vectora tocaka prazan
@@ -454,12 +459,16 @@ bool operator < (QPointF a, QPointF b) //kako bismo mogli sortirati vector tocak
     }
 }
 
-bool MainWindow::pointInSystem(QPointF point) //kako tocke i linije ne bi prelazile rubove koordinatnog sustava (odnosno ne mogu biti vece od range-a)
+bool MainWindow::pointInSystem(QPointF point) //kako tocke i linije ne bi prelazile rubove koordinatnog sustava (mogu biti samo malo vece od range-a i nikad ne smiju prelaziti rubove)
 {
     double multiplier = (ui->y_from->value() > 0)? 0.9:1.1;
-    if(point.x() >= ui->x_from->value() && point.x() <= ui->x_to->value() && point.y() >= ui->y_from->value()*multiplier && point.y() <= ui->y_to->value()*1.1) //(point.x() >= x1 && point.x() <= scene->width()-x2 && point.y() >= y1 && point.y() <= scene->height()-y2)
-        return true;
-    return false;
+    if(point.x() < ui->x_from->value() || point.x() > ui->x_to->value() || point.y() < ui->y_from->value()*multiplier || point.y() > ui->y_to->value()*1.1)
+        return false;
+    point = transform(point);
+    if(point.x() < x1 || point.x() > scene->width()-x2 || point.y() < y1 || point.y() > scene->height()-y2)
+        return false;
+
+    return true;
 }
 
 void MainWindow::createPoints() //na scenu se dodaju tocke iz datoteka

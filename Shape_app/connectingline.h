@@ -2,6 +2,8 @@
 #define CONNECTINGLINE_H
 
 #include "mainwindow.h"
+#include <QGraphicsLineItem>
+#include <QGraphicsTextItem>
 
 class connectingLine : public QGraphicsLineItem
 {

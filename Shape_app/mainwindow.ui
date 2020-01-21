@@ -474,9 +474,9 @@ border-radius: 12px;</string>
     <property name="geometry">
      <rect>
       <x>50</x>
-      <y>600</y>
+      <y>610</y>
       <width>691</width>
-      <height>141</height>
+      <height>171</height>
      </rect>
     </property>
     <property name="text">
@@ -1024,22 +1024,6 @@ background-color: #1C1C1C;
       <double>-3.000000000000000</double>
      </property>
     </widget>
-    <widget class="QPushButton" name="drawButton">
-     <property name="geometry">
-      <rect>
-       <x>110</x>
-       <y>30</y>
-       <width>111</width>
-       <height>25</height>
-      </rect>
-     </property>
-     <property name="styleSheet">
-      <string notr="true"/>
-     </property>
-     <property name="text">
-      <string>Do the magic</string>
-     </property>
-    </widget>
     <widget class="QCheckBox" name="gridBox">
      <property name="geometry">
       <rect>
@@ -1123,7 +1107,7 @@ background-color: #1C1C1C;
     <widget class="QPushButton" name="resetButton">
      <property name="geometry">
       <rect>
-       <x>10</x>
+       <x>140</x>
        <y>30</y>
        <width>81</width>
        <height>25</height>
@@ -1134,6 +1118,22 @@ background-color: #1C1C1C;
      </property>
      <property name="text">
       <string>Reset</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="drawButton">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>30</y>
+       <width>111</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
+     <property name="text">
+      <string>Do the magic!</string>
      </property>
     </widget>
    </widget>

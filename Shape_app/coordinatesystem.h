@@ -2,6 +2,7 @@
 #define COORDINATESYSTEM_H
 
 #include "mainwindow.h"
+#include <QGraphicsItemGroup>
 
 class coordinateSystem : public QGraphicsItemGroup
 {

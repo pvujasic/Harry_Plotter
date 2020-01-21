@@ -1,8 +1,6 @@
 #include "point.h"
 
 Point::Point(QPointF representedPoint, QPointF systemPoint, QString color, QGraphicsScene* scene, QGraphicsItem *parent) : QGraphicsEllipseItem(parent), scene(scene)
-//x i y su vrijednosti koje tocka reprezentira (potrebne zbog ispisa na ekranu nakon prelaska misa po tocki)
-//x_ i y_ su vrijednosti u pixelima gdje je tocka smjestena na sceni
 {
     QPen pen(color);
     pen.setWidth(2);

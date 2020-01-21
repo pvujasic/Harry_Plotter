@@ -2,27 +2,11 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QDebug>
 #include <QGraphicsScene>
-#include <QGraphicsEllipseItem>
-#include <QGraphicsLineItem>
-#include <QGraphicsTextItem>
-#include <QPen>
-#include <QFont>
-
-#include <QFile>
-#include <QTextStream>
-#include <QMessageBox>
-#include <QFileDialog>
-
-#include <QGraphicsItemGroup>
-#include <QGraphicsItem>
-#include <QGraphicsRectItem>
-#include <math.h>
 #include <vector>
 #include <tuple>
 
-#include "ui_mainwindow.h" //jel to ok
+#include "ui_mainwindow.h"
 
 class connectingLine;
 
@@ -75,15 +59,15 @@ private:
     Ui::MainWindow *ui;
     QGraphicsScene* scene;
 
-    std::vector<QPointF> filePoints[5]; //niz od 5 vectora (jer je moguce iscrtati max. 5 fja - u slucaju iscrtavanja iz datoteke samo prvi vector sadrzi tocke)
-    std::vector<QPointF> splinePoints[5];
-    std::vector<QPointF> functionPoints[5];
+    std::vector<QPointF> filePoints[5]; //niz od 5 vectora tocaka pomocu kojih se iscrtavaju funkcije
+    std::vector<QPointF> splinePoints[5]; //svaki vector sadrzi tocke potrebne za iscrtavanje kubicnog splinea za tocke iz datoteke
+    std::vector<QPointF> functionPoints[5]; //tocke iz datoteka
     std::tuple<double, double, double, double> system_Info; //informacije o koordinatnom sustavu koje sluze za iscrtavanje linija i tocaka
     QGraphicsItemGroup* grid;
-    std::vector<QLineEdit*> functionEdits;
-    std::vector<QLabel*> fileLabels;
-    std::vector<QCheckBox*> fileBoxes;
-    bool changedProgramatically; //da znamo je li range promijenjen u programu, u tom slucaju se ne zove funkcija plot
+    std::vector<QLineEdit*> functionEdits; //tijekom izvodenja programa, dinamicki se kreiraju QLineEditi (za upisivanje funkcija) koje pamtimo u ovom vectoru
+    std::vector<QLabel*> fileLabels; //labele koje sadrze imena odabranih datoteka
+    std::vector<QCheckBox*> fileBoxes; //check boxovi koji omogucuju brisanje datoteka
+    bool changedProgramatically; //kako bismo znali je li range promijenjen programski, u tom slucaju se ne zove funkcija plot
 
     QPointF transform(QPointF point);
     void createLines(std::vector<QPointF> points[5], bool type);

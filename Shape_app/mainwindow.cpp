@@ -6,6 +6,10 @@
 #include "fparser.hh"
 #include "spline.h"
 
+#include <QFileDialog>
+#include <QFile>
+#include <QTextStream>
+
 using namespace std;
 
 MainWindow::MainWindow(QWidget *parent)
@@ -45,7 +49,7 @@ QPointF MainWindow::transform(QPointF point) //transformira tocku u onu koja ce 
     return QPointF(x1 + (point.x()-xStart)*xStep, scene->height()-y2 - (point.y()-yStart)*yStep);
 }
 
-bool compareDoubles(double a, double b) //provjera jednakosti dva double broja
+bool compareDoubles(double a, double b)
 {
    double diff = a - b;
    return (diff < numeric_limits<double>::epsilon()) && (diff > -numeric_limits<double>::epsilon());
@@ -63,34 +67,34 @@ bool sameX(vector<QPointF> points) //vraca true ako vector sadrzi tocke s istom 
     return false;
 }
 
-QString selectColor(int colorNumber)
+QString selectColor(int colorNumber) //prvih 5 boja je za funkcije, drugih 5 za datoteke
 {
     switch(colorNumber)
     {
         case(0):
-            return QString("#f5d25d");
+            return QString("#ffc400");
         case(1):
-            return QString("#e69460");
+            return QString("#ff7f2e");
         case(2):
-            return QString("#e67cae");
+            return QString("#ff2b8f");
         case(3):
-            return QString("#799bdb");
+            return QString("#5993ff");
         case(4):
-            return QString("#69d1a7");
+            return QString("#32f0a3");
         case(5):
-            return QString("#edbc18");
+            return QString("#7ddbb5");
         case(6):
-            return QString("#e36c20");
+            return QString("#829dd1");
         case(7):
-            return QString("#e84391");
+            return QString("#db72a4");
         case(8):
-            return QString("#4277db");
+            return QString("#e69460");
         default:
-            return QString("#17bd79");
+            return QString("#e3c666");
     }
 }
 
-int firstEmpty(vector<QLabel*> fileLabels)   //vraca int slobodnog mjesta za function edit
+int firstEmpty(vector<QLabel*> fileLabels) //vraca redni broj prvog slobodnog mjesta u vectoru fileLabels
 {
     if(fileLabels.empty())
         return 0;
@@ -104,7 +108,7 @@ int firstEmpty(vector<QLabel*> fileLabels)   //vraca int slobodnog mjesta za fun
     return n;
 }
 
-int numberElements(vector<QLabel*> fileLabels)
+int numberElements(vector<QLabel*> fileLabels) //vraca broj datoteka
 {
     int n = 0;
     if(fileLabels.empty())
@@ -129,7 +133,7 @@ vector<double> linspace(double start, double end, int num) //po uzoru na pythono
     return linspaced;
 }
 
-void MainWindow::cubicSpline(double xStart, double xEnd) //za iscrtavanje kubicnog spline-a
+void MainWindow::cubicSpline(double xStart, double xEnd) //u niz splinePoints na odgovarajuca mjesta stavlja vectore sa vrijednostima kubicnog splinea
 
 {
     vector<double> X, Y;
@@ -158,7 +162,7 @@ void MainWindow::cubicSpline(double xStart, double xEnd) //za iscrtavanje kubicn
     }
 }
 
-void MainWindow::on_selectFile_clicked() //slot za Select file
+void MainWindow::on_selectFile_clicked() //pritiskom gumba Select file u filePoints se na odgovarajuce mjesto sprema vector tocaka iz datoteke
 {
     ui->warningLabel->setText("");
 
@@ -218,7 +222,7 @@ void MainWindow::on_selectFile_clicked() //slot za Select file
 
     if(points.size() < 3)
     {
-        ui->warningLabel->setText("File does not contain at least three correctly specified points.\nPoints from this file won't be plotted.");
+        ui->warningLabel->setText("File does not contain at least three correctly specified points.\n\nPoints from this file won't be plotted.");
         fileLabels[position]->setStyleSheet("border: 1px solid #850000;\ncolor: "+ color);
         return;
     }
@@ -237,14 +241,15 @@ void MainWindow::on_selectFile_clicked() //slot za Select file
         ui->selectFile->setEnabled(false);
 }
 
-bool isUndefined(QPointF point)
+bool isUndefined(QPointF point) //provjerava je li tocka definirana (npr. ako za x vrijednost funkcija nije definirana, tocka se sprema kao (epsilon, epsilon)
 {
     if(compareDoubles(point.x(), numeric_limits<double>::epsilon()) && compareDoubles(point.y(), numeric_limits<double>::epsilon()))
         return true;
     return false;
 }
 
-void pushPoints(vector<QPointF> points[5], vector<double>* Y, double xStart, double xEnd)
+void pushPoints(vector<QPointF> points[5], vector<double>* Y, double xStart, double xEnd) //sluzi za funkciju yBoundaries, u vector Y se stavljaju y koordinate
+                                                                                          //svih vectora tocaka, ali samo one za koje je x izmedu xStart i xEnd
 {
     for(int n = 0; n < 5; ++n)
     {
@@ -260,13 +265,14 @@ void pushPoints(vector<QPointF> points[5], vector<double>* Y, double xStart, dou
     }
 }
 
-void MainWindow::yBoundaries(double* yStart, double* yEnd, double xStart, double xEnd)
+void MainWindow::yBoundaries(double* yStart, double* yEnd, double xStart, double xEnd) //za automatsko racunanje y range-a,
+                                                                                       //traze se max i min tocaka svih funkcija i datoteka
 {
     vector<double> Y;
     pushPoints(functionPoints, &Y, xStart, xEnd);
     pushPoints(filePoints, &Y, xStart, xEnd);
-    if(ui->style_comboBox->currentIndex() == 2)
-        pushPoints(splinePoints, &Y, xStart, xEnd);
+    //if(ui->style_comboBox->currentIndex() == 2)
+        //pushPoints(splinePoints, &Y, xStart, xEnd);
 
     if(Y.empty())
         *yStart = *yEnd = 0;
@@ -284,15 +290,23 @@ void MainWindow::yBoundaries(double* yStart, double* yEnd, double xStart, double
     }
 }
 
-void MainWindow::plot(bool automatic)
+void MainWindow::plot(bool automatic) //najvaznija funkcija, poziva se svaki put prilikom crtanja na sceni
+                                      //argument automatic - true ako se x i y range racunaju automatski, inace false
 {
     ui->warningLabel->setText("");
+    QString warningText = "";
     double xStart, xEnd, yStart, yEnd;
 
     xStart = double(ui->x_from->value());
     xEnd = double(ui->x_to->value());
 
-    if(automatic)
+    if(xStart >= xEnd)
+    {
+        ui->warningLabel->setText("Incorrect x range!");
+        return;
+    }
+
+    if(automatic)  //ako se x range racuna automatski, uzimaju se u obzir x koordinate tocaka iz datoteka i trenutni x range te se stavljaju maksimalne(minimalne) vrijednosti
     {
         double min = xStart, max = xEnd;
         for(int i = 0; i < 5; ++i)
@@ -316,7 +330,7 @@ void MainWindow::plot(bool automatic)
     fparser.AddConstant("pi", 3.14159265358979323846);
     fparser.AddConstant("e", 2.71828182845904523536);
 
-    double value[1]; //fja Eval() kod FunctionParsera prima pointer na niz (buduci da iscrtavamo samo fje jedne varijable, taj niz uvijek ima jedan element)
+    double value[1]; //funkcija Eval() kod FunctionParsera prima pointer na niz (buduci da iscrtavamo samo fje jedne varijable, taj niz uvijek ima jedan element)
 
     scene->clear();
     for(int i = 0; i < 5; ++i)
@@ -325,13 +339,13 @@ void MainWindow::plot(bool automatic)
     value[0] = xStart;
 
     int n = -1;
-    for(auto i = functionEdits.begin(); i != functionEdits.end(); ++i) //dodajemo tocke (potrebne za iscrtavanje linija) u vectore i pronalazimo najvecu i najmanju y vrijednost
+    for(auto i = functionEdits.begin(); i != functionEdits.end(); ++i) //u niz vectora functionPoints dodajemo tocke potrebne za iscrtavanje funkcija
     {
         n++;
         if (fparser.Parse((*i)->text().toStdString(), "x") != -1)
         {
             if((*i)->text() != "")
-                ui->warningLabel->setText("Incorrectly specified function: f(x) = " + (*i)->text());
+                warningText += "Incorrectly specified function: f(x) = " + (*i)->text() + "\n\n";
             continue;
         }
         QString function = (*i)->text();
@@ -347,10 +361,13 @@ void MainWindow::plot(bool automatic)
             else
             {
                 functionPoints[n].push_back(QPointF(numeric_limits<double>::epsilon(),numeric_limits<double>::epsilon()));
-                ui->warningLabel->setText("Function f(x) = " + (*i)->text() + " is not defined for the whole range.");
+                if(!warningText.contains("Function f(x) = " + (*i)->text() + " is not defined for the whole range."))
+                    warningText += "Function f(x) = " + (*i)->text() + " is not defined for the whole range.\n\n";
             }
         }
     }
+
+    ui->warningLabel->setText(warningText);
 
     if(automatic)
     {
@@ -402,10 +419,10 @@ void MainWindow::plot(bool automatic)
 
 void MainWindow::on_drawButton_clicked()
 {
-    plot(true);
+    plot(true); //automatski se racuna range
 }
 
-bool pointsEmpty(vector<QPointF> points[5])
+bool pointsEmpty(vector<QPointF> points[5]) //provjera je li svaki od 5 vectora tocaka prazan
 {
     for(int i = 0; i < 5; ++i)
     {
@@ -415,7 +432,7 @@ bool pointsEmpty(vector<QPointF> points[5])
     return true;
 }
 
-void MainWindow::on_style_comboBox_currentIndexChanged(int index) //slot za promjenu stila kod iscrtavanja iz datoteke
+void MainWindow::on_style_comboBox_currentIndexChanged(int index)
 {
     if(!pointsEmpty(filePoints))
         plot(false);
@@ -437,7 +454,7 @@ bool operator < (QPointF a, QPointF b) //kako bismo mogli sortirati vector tocak
     }
 }
 
-bool MainWindow::pointInSystem(QPointF point) 
+bool MainWindow::pointInSystem(QPointF point) //kako tocke i linije ne bi prelazile rubove koordinatnog sustava (odnosno ne mogu biti vece od range-a)
 {
     double multiplier = (ui->y_from->value() > 0)? 0.9:1.1;
     if(point.x() >= ui->x_from->value() && point.x() <= ui->x_to->value() && point.y() >= ui->y_from->value()*multiplier && point.y() <= ui->y_to->value()*1.1) //(point.x() >= x1 && point.x() <= scene->width()-x2 && point.y() >= y1 && point.y() <= scene->height()-y2)
@@ -445,7 +462,7 @@ bool MainWindow::pointInSystem(QPointF point)
     return false;
 }
 
-void MainWindow::createPoints()
+void MainWindow::createPoints() //na scenu se dodaju tocke iz datoteka
 {
     for(int n = 0; n < 5; ++n)
     {
@@ -464,7 +481,8 @@ void MainWindow::createPoints()
 }
 
 
-void MainWindow::createLines(vector<QPointF> points[5], bool type) //iscrtavanje linija medu tockama //type - 0 za file, 1 za funkcije
+void MainWindow::createLines(vector<QPointF> points[5], bool type) //na scenu se dodaju linije koje cine funkcije
+                                                                   //type - 0 za datoteke, 1 za funkcije
 {
     QString color;
     QString text;
@@ -603,7 +621,7 @@ void MainWindow::on_resetButton_clicked() //defaultne postavke i onemogucavanje 
     ui->delete_function->setEnabled(false);
     ui->add_function->setEnabled(true);
 
-    plot(true); //moze i false
+    plot(false);
 }
 
 void MainWindow::on_x_from_valueChanged(double d)
@@ -675,18 +693,4 @@ void MainWindow::on_pointsNumber_valueChanged(int arg1)
     if(!pointsEmpty(functionPoints))
         plot(true);
 }
-
-//sad:
-    //labela za greske
-    //poboljšati primjere za točke.. umaskirati za spline
-    //includeovi
-    //promijeniti komentare
-    //promijeniti boje funkcija i velicine tocki
-
-//ime, gitignore, parser
-
-
-
-
-
 

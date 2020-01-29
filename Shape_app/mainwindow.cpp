@@ -28,15 +28,11 @@ MainWindow::MainWindow(QWidget *parent)
     ui->graphicsView->setFixedSize(width+2*ui->graphicsView->frameWidth(), height+2*ui->graphicsView->frameWidth());
     this->setFixedSize(QSize(1062, 800));
 
-    QGraphicsTextItem* startText = new QGraphicsTextItem();
-    startText->setPlainText("Get started!");
-    startText->setDefaultTextColor(Qt::gray);
-    startText->setPos(scene->width()/2 - startText->boundingRect().width()/2, scene->height()/2 - startText->boundingRect().height()/2);
-    scene->addItem(startText);
-
     functionEdits.push_back(ui->functionEdit1);
     grid = new QGraphicsItemGroup();
     changedProgramatically = false;
+    plot(false);
+    ui->warningLabel->setText("Get started!");
 }
 
 MainWindow::~MainWindow()
@@ -83,7 +79,7 @@ QString selectColor(int colorNumber) //prvih 5 boja je za funkcije, drugih 5 za 
         case(4):
             return QString("#32f0a3");
         case(5):
-            return QString("#7ddbb5");
+            return QString("#7ddb9b");
         case(6):
             return QString("#829dd1");
         case(7):
@@ -91,7 +87,7 @@ QString selectColor(int colorNumber) //prvih 5 boja je za funkcije, drugih 5 za 
         case(8):
             return QString("#e69460");
         default:
-            return QString("#e3c666");
+            return QString("#edd37b");
     }
 }
 
@@ -410,11 +406,6 @@ void MainWindow::plot(bool automatic) //najvaznija funkcija, poziva se svaki put
 
     if(!ui->gridBox->isChecked())
        grid->hide();
-
-    ui->x_from->setEnabled(true);
-    ui->x_to->setEnabled(true);
-    ui->y_from->setEnabled(true);
-    ui->y_to->setEnabled(true);
 }
 
 

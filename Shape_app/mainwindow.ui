@@ -486,27 +486,6 @@ border-radius: 12px;</string>
      <set>Qt::AlignHCenter|Qt::AlignTop</set>
     </property>
    </widget>
-   <widget class="QLabel" name="label_9">
-    <property name="geometry">
-     <rect>
-      <x>50</x>
-      <y>30</y>
-      <width>691</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>16</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>Harry Plotter</string>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignCenter</set>
-    </property>
-   </widget>
    <widget class="QGroupBox" name="groupBox_3">
     <property name="geometry">
      <rect>
@@ -856,7 +835,7 @@ background-color: #1C1C1C;
     </property>
     <widget class="QDoubleSpinBox" name="x_from">
      <property name="enabled">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <property name="geometry">
       <rect>
@@ -919,7 +898,7 @@ background-color: #1C1C1C;
     </widget>
     <widget class="QDoubleSpinBox" name="x_to">
      <property name="enabled">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <property name="geometry">
       <rect>
@@ -941,7 +920,7 @@ background-color: #1C1C1C;
     </widget>
     <widget class="QDoubleSpinBox" name="y_to">
      <property name="enabled">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <property name="geometry">
       <rect>
@@ -1004,7 +983,7 @@ background-color: #1C1C1C;
     </widget>
     <widget class="QDoubleSpinBox" name="y_from">
      <property name="enabled">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <property name="geometry">
       <rect>
@@ -1261,16 +1240,16 @@ background-color: #1C1C1C;
     <property name="geometry">
      <rect>
       <x>200</x>
-      <y>20</y>
-      <width>121</width>
-      <height>51</height>
+      <y>30</y>
+      <width>301</width>
+      <height>41</height>
      </rect>
     </property>
     <property name="text">
      <string/>
     </property>
     <property name="pixmap">
-     <pixmap resource="Images.qrc">:/Files/Magic plotter logo.svg</pixmap>
+     <pixmap resource="Images.qrc">:/Files/logo1.png</pixmap>
     </property>
    </widget>
   </widget>

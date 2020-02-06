@@ -74,9 +74,7 @@ private:
     QPointF transform(QPointF point);
     void createLines();
     void createPoints();
-    void clearPoints();
     void yBoundaries(double* yStart, double* yEnd, double xStart, double xEnd);
     bool pointInSystem(QPointF point);
-    void cubicSpline(double xStart, double xEnd);
 };
 #endif // MAINWINDOW_H

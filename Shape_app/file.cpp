@@ -67,13 +67,13 @@ QString File::generatePoints(QTextStream* in)
     if(points_.size() < 3)
     {
         ui->fileLabel->setStyleSheet("border: 2px solid #850000;\ncolor: "+ color);
-        return "File does not contain at least three correctly specified points.\n\nPoints from this file won't be plotted.";
+        return "File \"" + name + "\" does not contain at least three correctly specified points.\n\nPoints from this file will not be plotted.";
     }
 
     if(Utility::sameX(points_)) //provjera sadrzi li file tocke s istom x vrijednosti
     {
         ui->fileLabel->setStyleSheet("border: 2px solid #850000;\ncolor: "+ color);
-        return "File contains points with same x value.\n\nPoints from this file won't be plotted.";
+        return "File \"" + name + "\" contains points with same x value.\n\nPoints from this file will not be plotted.";
     }
     points = points_;
 

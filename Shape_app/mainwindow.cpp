@@ -65,11 +65,9 @@ bool operator<(QPointF a, QPointF b) //kako bismo mogli sortirati vector tocaka
     }
 }
 
-void MainWindow::on_selectFile_clicked() //pritiskom gumba Select file u filePoints se na odgovarajuce mjesto sprema vector tocaka iz datoteke
+void MainWindow::on_selectFile_clicked()
 {
-    ui->warningLabel->setText("");
-
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), "/home/paula/shape-app", tr("Text Files (*.txt)")); //"/home/paula/shape-app"
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), "", tr("Text Files (*.txt)"));
     if(fileName.isEmpty())
         return;
 
@@ -83,13 +81,14 @@ void MainWindow::on_selectFile_clicked() //pritiskom gumba Select file u filePoi
     files.append(file);
     QString message = file->generatePoints(&in);
     std::sort(file->points.begin(), file->points.end());
-    if(message != "")
-        ui->warningLabel->setText(message);
     file_.close();
     ui->fileLayout->addWidget(file);
-
     connect(file, &File::deleteFileSignal, this, &MainWindow::deleteFile);
-    plot(true);
+
+    if(message != "")
+        ui->warningLabel->setText(message);
+    else
+        plot(true);
 
     if(int(files.size()) == 5)
         ui->selectFile->setEnabled(false);
@@ -175,7 +174,7 @@ void MainWindow::plot(bool automatic) //najvaznija funkcija, poziva se svaki put
             {
                 if(!(*i)->points.empty())
                 {
-                    if((*i)->points.front().x() < min) //filePoints su uvijek sortirane
+                    if((*i)->points.front().x() < min)
                         min = (*i)->points.front().x();
                     if((*i)->points.back().x() > max)
                         max = (*i)->points.back().x();

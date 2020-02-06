@@ -1,7 +1,6 @@
 #include "coordinatesystem.h"
 #include <math.h>
-
-using namespace std;
+#include <QPair>
 
 coordinateSystem::coordinateSystem(QGraphicsScene *scene, QGraphicsItem *parent) : QGraphicsItemGroup(parent)
 {
@@ -57,7 +56,7 @@ double findStep(double len) //vraca vrijednost razmaka izmedu dva ticka - ne nje
 }
 
 
-tuple<tuple<double, double, double, double>, QGraphicsItemGroup*> coordinateSystem::init(QGraphicsScene *scene, double xStart, double xEnd, double yStart, double yEnd)
+std::tuple<std::tuple<double, double, double, double>, QGraphicsItemGroup*> coordinateSystem::init(QGraphicsScene *scene, double xStart, double xEnd, double yStart, double yEnd)
 {
     double xLen = xEnd - xStart;
     double yLen = yEnd - yStart;
@@ -128,7 +127,7 @@ tuple<tuple<double, double, double, double>, QGraphicsItemGroup*> coordinateSyst
     scene->addItem(this);
     scene->addItem(grid);
 
-    return make_tuple(make_tuple(xBeginning, yBeginning, xWidth/xStep, yWidth/yStep), grid); //funkcija vraca informacije o ishodistu koordinatnog sustava, te o kvocijentu duljine razmaka izmedu dva ticka u pixelima i vrijednosti koju taj razmak reprezentira u koord. sustavu kako bismo mogli iscrtavati linije i tocke
+    return std::make_tuple(std::make_tuple(xBeginning, yBeginning, xWidth/xStep, yWidth/yStep), grid); //funkcija vraca informacije o ishodistu koordinatnog sustava, te o kvocijentu duljine razmaka izmedu dva ticka u pixelima i vrijednosti koju taj razmak reprezentira u koord. sustavu kako bismo mogli iscrtavati linije i tocke
                                                                                              //fja vraca i grid koji ce se prikazivati po potrebi, u ovisnosti o checkBoxu Show grid
 }
 

@@ -1,5 +1,5 @@
 #include "point.h"
-
+#include <QDebug>
 Point::Point(QPointF representedPoint, QPointF systemPoint, QString color, QGraphicsScene* scene, QGraphicsItem *parent) : QGraphicsEllipseItem(parent), scene(scene)
 {
     QPen pen(color);

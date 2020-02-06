@@ -16,26 +16,36 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    colormanager.cpp \
     connectingline.cpp \
     coordinatesystem.cpp \
+    file.cpp \
     fparser.cc \
     fpoptimizer.cc \
+    function.cpp \
     main.cpp \
     mainwindow.cpp \
-    point.cpp
+    point.cpp \
+    utility.cpp
 
 HEADERS += \
+    colormanager.h \
     connectingline.h \
     coordinatesystem.h \
     extrasrc/fpaux.hh \
     extrasrc/fptypes.hh \
+    file.h \
     fparser.hh \
     fpconfig.hh \
+    function.h \
     mainwindow.h \
     point.h \
-    spline.h
+    spline.h \
+    utility.h
 
 FORMS += \
+    file.ui \
+    function.ui \
     mainwindow.ui
 
 # Default rules for deployment.
